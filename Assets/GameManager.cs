@@ -24,6 +24,9 @@ public class GameManager : MonoBehaviour
     public float averageResourceCollectionRatePerSecond = 0f;
 
 
+    public GameObject selectedUnit;
+
+
     GameObject[] collectors;
     
 
@@ -32,13 +35,41 @@ public class GameManager : MonoBehaviour
     {
         baseBuildingScript = GameObject.Find("BASE").GetComponent<BaseBuildingScript>();
         canvasController = GameObject.Find("Canvas").GetComponent<CanvasController>();
-        
+        canvasController.gameManager = this;
+        canvasController.HideCollectorUI();
     }
 
     // Update is called once per frame
     void Update()
     {
         averageResourceCollectionRatePerSecond = calculateAverageResourceCollectionRatePerSecond();
+        HandleUnitSelection();
+    }
+
+    public void HandleUnitSelection()
+    {
+        /*
+        if left mouse button is clicked
+        check if the object clicked is a collector
+        if it is, select the collector
+        if not, deselect the collector
+        */
+        if(Input.GetMouseButtonDown(0))
+        {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if(Physics.Raycast(ray, out hit))
+            {
+                if(hit.collider.tag == "Collector")
+                {
+                    selectedUnit = hit.collider.gameObject;
+                    canvasController.ShowCollectorUI();
+                }else{
+                    selectedUnit = null;
+                    canvasController.HideCollectorUI();
+                }
+            }
+        }
     }
 
     public void increaseCollectorSpeed()

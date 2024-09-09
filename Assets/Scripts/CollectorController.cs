@@ -39,6 +39,7 @@ public class CollectorController : MonoBehaviour
     {
         collectorRb = GetComponent<Rigidbody>();
         baseBuilding = GameObject.Find("BASE");
+        gameObject.name = GetInitShipName();
     }
 
     // Update is called once per frame
@@ -196,5 +197,33 @@ public class CollectorController : MonoBehaviour
     {
         resourceCollected += amount;
     }
+
+
+    public string GetInitShipName()
+    {
+        string[] shipnames = 
+        new string[] {
+            "The Flying Dutchman",
+            "The Black Pearl",
+            "The Jolly Roger",
+            "The Queen Anne's Revenge",
+            "The Mayflower",
+            "The Bounty",
+            "The Endurance",
+            "The Titanic",
+            "The Lusitania",
+            "The Britannic",
+            "The Enterprise",
+            "The Millennium Falcon",
+            "The Serenity",
+            "The Bebop",
+            "The Normandy",
+            "The Galactica",
+            "The Defiant",
+            "The Discovery",
+            "The Nostromo",
+            "The Rocinante"};
+        return shipnames[Random.Range(0, shipnames.Length)];
+    }   
     
 }

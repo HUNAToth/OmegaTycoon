@@ -18,6 +18,13 @@ public class CanvasController : MonoBehaviour
     public GameObject upgradeCollectorLoadRateButton;
     public GameObject upgradeCollectorOffloadRateButton;
 
+
+    public GameObject unitStatsUI;
+    public GameObject UIUnitNameDisplayText;
+    public GameObject UIUnitSpeedDisplayText;
+    public GameObject UIUnitCapacityDisplayText;
+    public GameObject UIUnitLoadDisplayText;
+
     public GameManager gameManager;
 
     void Start()
@@ -42,7 +49,32 @@ public class CanvasController : MonoBehaviour
             gameManager.calculateUpgradeCost(gameManager.collectorResourceGatherRateLevel));
         updateCollectorOffloadRateButtonText(gameManager.collectorResourceOffloadRate,
             gameManager.calculateUpgradeCost(gameManager.collectorResourceOffloadRateLevel));
+            if(gameManager.selectedUnit != null)
+            {
+                updateUnitStatsDisplay();
+            }
     }
+
+
+    public void ShowCollectorUI(){
+        unitStatsUI.SetActive(true);
+        upgradeCollectorSpeedButton.SetActive(true);
+        upgradeCollectorCapacityButton.SetActive(true);
+        UIUnitLoadDisplayText.SetActive(true);
+    }
+
+    public void HideCollectorUI(){
+    
+        unitStatsUI.SetActive(false);
+    }
+
+    public void updateUnitStatsDisplay()
+    {
+        UIUnitNameDisplayText.GetComponent<TextMeshProUGUI>().text =  gameManager.selectedUnit.name;
+        UIUnitSpeedDisplayText.GetComponent<TextMeshProUGUI>().text =  gameManager.collectorMovementSpeed.ToString();
+        UIUnitCapacityDisplayText.GetComponent<TextMeshProUGUI>().text =  gameManager.collectorResourceCapacity.ToString();
+        UIUnitLoadDisplayText.GetComponent<TextMeshProUGUI>().text =  gameManager.selectedUnit.GetComponent<CollectorController>().resourceCollected.ToString();
+     }
 
     public void updateResourceText(float resourceAmount)
     {
@@ -51,23 +83,22 @@ public class CanvasController : MonoBehaviour
 
     public void updateCollectorSpeedButtonText(float collectorMovementSpeed, float upgradeCost)
     {
-        upgradeCollectorSpeedButton.GetComponentInChildren<TextMeshProUGUI>().text = 
-        collectorMovementSpeed.ToString() + " (" + upgradeCost.ToString() + ")";
+        upgradeCollectorSpeedButton.GetComponentInChildren<TextMeshProUGUI>().text = upgradeCost.ToString() ;
     }
     
     public void updateCollectorCapacityButtonText(float collectorResourceCapacity,   float upgradeCost)    
     {
-        upgradeCollectorCapacityButton.GetComponentInChildren<TextMeshProUGUI>().text =  collectorResourceCapacity.ToString()+ " (" + upgradeCost.ToString() + ")";
+        upgradeCollectorCapacityButton.GetComponentInChildren<TextMeshProUGUI>().text = upgradeCost.ToString();
     }
 
     public void updateCollectorLoadRateButtonText(float collectorResourceGatherRate, float upgradeCost)
     {
-        upgradeCollectorLoadRateButton.GetComponentInChildren<TextMeshProUGUI>().text = collectorResourceGatherRate.ToString() + " (" + upgradeCost.ToString() + ")";
+        upgradeCollectorLoadRateButton.GetComponentInChildren<TextMeshProUGUI>().text =  upgradeCost.ToString() ;
     }
 
     public void updateCollectorOffloadRateButtonText(float collectorResourceOffloadRate, float upgradeCost)
     {
-        upgradeCollectorOffloadRateButton.GetComponentInChildren<TextMeshProUGUI>().text =  collectorResourceOffloadRate.ToString() + " (" + upgradeCost.ToString() + ")";
+        upgradeCollectorOffloadRateButton.GetComponentInChildren<TextMeshProUGUI>().text =  upgradeCost.ToString() ;
     }
   
     public void updateCollectorButton(float resourceAmount,float resourceCost){
