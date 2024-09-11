@@ -190,6 +190,7 @@ public class CollectorController : MonoBehaviour
         if(resourceCollected <= 0){
             isOffloading = false;
             isMovingToResource = true;
+            resourceCollected = 0;
         }
     }
 

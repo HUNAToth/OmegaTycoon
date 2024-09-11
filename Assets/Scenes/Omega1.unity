@@ -1415,6 +1415,7 @@ MonoBehaviour:
   UIUnitCapacityDisplayText: {fileID: 2084846006}
   UIUnitLoadDisplayText: {fileID: 910553865}
   gameManager: {fileID: 1461140072}
+  upgradeButtons: []
 --- !u!114 &422718042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4858,7 +4859,7 @@ MonoBehaviour:
   baseBuildingScript: {fileID: 0}
   canvasController: {fileID: 0}
   resourceAmount: 100
-  resourceCapacity: 1000
+  resourceCapacity: 10000
   collectorMovementSpeed: 3
   collectorMovementSpeedLevel: 1
   collectorResourceCapacity: 100
