@@ -108,6 +108,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public GameObject[] getCollectors(){
+        collectors = baseBuildingScript.collectors;
+        return collectors;
+    }
+
     public void increaseCollectorLoadRate(){
         if(resourceAvailable(collectorResourceGatherRateLevel)){
             collectorResourceGatherRate += 0.5f;

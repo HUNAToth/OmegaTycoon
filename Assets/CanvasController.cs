@@ -27,12 +27,19 @@ public class CanvasController : MonoBehaviour
 
     public GameManager gameManager;
 
+    public List<GameObject> upgradeButtons;
+
     void Start()
     {
         resourceText = GameObject.Find("UIResourceText").GetComponent<TextMeshProUGUI>();
         spawnCollectorButton = GameObject.Find("SpawnCollectorButton");
         gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         spawnCollectorButtonText = spawnCollectorButton.GetComponentInChildren<TextMeshProUGUI>();
+
+        upgradeButtons.Add(upgradeCollectorSpeedButton);
+        upgradeButtons.Add(upgradeCollectorCapacityButton);
+        upgradeButtons.Add(upgradeCollectorLoadRateButton);
+        upgradeButtons.Add(upgradeCollectorOffloadRateButton);
         
     }
 
@@ -41,19 +48,72 @@ public class CanvasController : MonoBehaviour
     {
         updateResourceText(gameManager.resourceAmount);
         updateCollectorButton(gameManager.resourceAmount, gameManager.calculateCollectorCost());
-        updateCollectorSpeedButtonText(gameManager.collectorMovementSpeed,
+       /* updateCollectorSpeedButtonText(gameManager.collectorMovementSpeed,
             gameManager.calculateUpgradeCost(gameManager.collectorMovementSpeedLevel));
         updateCollectorCapacityButtonText(gameManager.collectorResourceCapacity,
             gameManager.calculateUpgradeCost(gameManager.collectorResourceCapacityLevel));
         updateCollectorLoadRateButtonText(gameManager.collectorResourceGatherRate,
             gameManager.calculateUpgradeCost(gameManager.collectorResourceGatherRateLevel));
         updateCollectorOffloadRateButtonText(gameManager.collectorResourceOffloadRate,
-            gameManager.calculateUpgradeCost(gameManager.collectorResourceOffloadRateLevel));
+            gameManager.calculateUpgradeCost(gameManager.collectorResourceOffloadRateLevel));*/
             if(gameManager.selectedUnit != null)
             {
                 updateUnitStatsDisplay();
             }
+            for(int i = 0; i < upgradeButtons.Count ; i++)
+            {
+                switch(upgradeButtons[i].name)
+                {
+                    case "UpgradeCollectorMovementSpeedBTN":
+                        updateUpgradeBTN(upgradeButtons[i],
+                                         gameManager.resourceAmount, 
+                                         gameManager.calculateUpgradeCost(gameManager.collectorMovementSpeedLevel));
+                        break;
+                    case "UpgradeCollectorCapacityBTN":
+                        updateUpgradeBTN(upgradeButtons[i], 
+                                        gameManager.resourceAmount, 
+                                        gameManager.calculateUpgradeCost(gameManager.collectorResourceCapacityLevel));
+                        break;
+                    case "UpgradeCollectorLoadSpeedBTN":
+                        updateUpgradeBTN(upgradeButtons[i], 
+                                        gameManager.resourceAmount, 
+                                        gameManager.calculateUpgradeCost(gameManager.collectorResourceGatherRateLevel));
+                        break;
+                    case "UpgradeCollectorOffLoadSpeedBTN":
+                        updateUpgradeBTN(upgradeButtons[i], 
+                                        gameManager.resourceAmount, 
+                                        gameManager.calculateUpgradeCost(gameManager.collectorResourceOffloadRateLevel));
+                        break;
+                }
+                //updateUpgradeBTN(upgradeButtons[i], gameManager.resourceAmount, gameManager.calculateUpgradeCost(i));
+                                
+            }
     }
+
+    public void updateUpgradeBTN(GameObject button, float resourceAmount, float resourceCost)
+    {
+        if(gameManager.getCollectors().Length == 0)
+        {
+            button.GetComponent<UnityEngine.UI.Button>().interactable = false;
+            button.GetComponentInChildren<TextMeshProUGUI>().text = " " + resourceCost + " ";
+            return;
+        }
+
+        UnityEngine.UI.Button upgradeButton = button.GetComponent<UnityEngine.UI.Button>();
+
+        if(resourceAmount < resourceCost)
+        {
+            upgradeButton.interactable = false;
+            //update button text too
+        }
+        else
+        {
+            upgradeButton.interactable = true;
+        }
+        
+        button.GetComponentInChildren<TextMeshProUGUI>().text = " " + resourceCost + " ";
+    }
+
 
 
     public void ShowCollectorUI(){
@@ -81,26 +141,6 @@ public class CanvasController : MonoBehaviour
         resourceText.text = "Resources: " + resourceAmount.ToString();
     }
 
-    public void updateCollectorSpeedButtonText(float collectorMovementSpeed, float upgradeCost)
-    {
-        upgradeCollectorSpeedButton.GetComponentInChildren<TextMeshProUGUI>().text = upgradeCost.ToString() ;
-    }
-    
-    public void updateCollectorCapacityButtonText(float collectorResourceCapacity,   float upgradeCost)    
-    {
-        upgradeCollectorCapacityButton.GetComponentInChildren<TextMeshProUGUI>().text = upgradeCost.ToString();
-    }
-
-    public void updateCollectorLoadRateButtonText(float collectorResourceGatherRate, float upgradeCost)
-    {
-        upgradeCollectorLoadRateButton.GetComponentInChildren<TextMeshProUGUI>().text =  upgradeCost.ToString() ;
-    }
-
-    public void updateCollectorOffloadRateButtonText(float collectorResourceOffloadRate, float upgradeCost)
-    {
-        upgradeCollectorOffloadRateButton.GetComponentInChildren<TextMeshProUGUI>().text =  upgradeCost.ToString() ;
-    }
-  
     public void updateCollectorButton(float resourceAmount,float resourceCost){
         UnityEngine.UI.Button button = spawnCollectorButton.GetComponent<UnityEngine.UI.Button>();
         if(resourceAmount < resourceCost)
@@ -118,4 +158,5 @@ public class CanvasController : MonoBehaviour
         }
     }
 
+    
 }

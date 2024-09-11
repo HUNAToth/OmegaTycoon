@@ -51,7 +51,7 @@ public class CollectorController : MonoBehaviour
     private void FixedUpdate()
     {
         if (isCollecting){
-            CollectResource(targetResource.GetComponent<ResourcePointScript>());
+            CollectResource(targetResource.GetComponentInParent<ResourcePointScript>());
          }
          if(isOffloading){
             OffLoadResource();
@@ -111,7 +111,7 @@ public class CollectorController : MonoBehaviour
         Vector3 position = transform.position;
         foreach (GameObject resource in resources)
         {
-            ResourcePointScript resourcePoint = resource.GetComponent<ResourcePointScript>();
+            ResourcePointScript resourcePoint = resource.GetComponentInParent<ResourcePointScript>();
             if(resourcePoint.isHarvested && 
                resourcePoint.currentCollector != this)
             {
