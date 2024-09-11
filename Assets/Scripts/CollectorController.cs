@@ -30,7 +30,7 @@ public class CollectorController : MonoBehaviour
     public float offloadingTime = 5f;
     public float offloadingTimer = 0f;
     public float resourceCapacity = 100f;
-
+    public bool isSelected = false;
     public bool onBase = false;
 
 
@@ -50,6 +50,7 @@ public class CollectorController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        selfSelectCheck();
         if (isCollecting){
             CollectResource(targetResource.GetComponentInParent<ResourcePointScript>());
          }
@@ -68,8 +69,19 @@ public class CollectorController : MonoBehaviour
         {
             MoveToBase();
         }   
+    }
 
-       
+    void selfSelectCheck()
+    {
+        
+        if( baseBuilding.GetComponent<BaseBuildingScript>().gameManager.selectedUnit!= null &&
+            (baseBuilding.GetComponent<BaseBuildingScript>().gameManager.selectedUnit.name == this.name)){
+            isSelected = false;
+            this.GetComponent<Renderer>().material.color = Color.white;
+        
+        }else{
+            isSelected = false;
+        }
     }
 
 
@@ -183,7 +195,7 @@ public class CollectorController : MonoBehaviour
             {
                 offloadingTimer = 0;
                 baseBuilding.GetComponent<BaseBuildingScript>().AddResource(resourceOffloadRate);
-                Debug.Log("Resource offloaded, new amount in GameManager: " + gameManager.resourceAmount);
+               // Debug.Log("Resource offloaded, new amount in GameManager: " + gameManager.resourceAmount);
                 resourceCollected -= resourceOffloadRate;
             }
         }

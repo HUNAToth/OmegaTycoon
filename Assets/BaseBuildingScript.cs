@@ -59,7 +59,7 @@ public class BaseBuildingScript : MonoBehaviour
         if(gameManager.resourceAmount < gameManager.resourceCapacity)
         {
             gameManager.resourceAmount += amount;
-            Debug.Log("BaseBuilding sent resource " + amount + " to GameManager. New amount in GameManager: " + gameManager.resourceAmount);
+           // Debug.Log("BaseBuilding sent resource " + amount + " to GameManager. New amount in GameManager: " + gameManager.resourceAmount);
         }
     }
 
