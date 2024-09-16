@@ -15,7 +15,6 @@ public class GameManager : MonoBehaviour
     public float collectorMovementSpeedLevel = 1f;
     public float collectorResourceCapacity = 100f;
     public float collectorResourceCapacityLevel = 1f;
-    public float collectorResourceAmount = 0f;
     public float collectorResourceGatherRate = 1f;
     public float collectorResourceGatherRateLevel = 1f;
     public float collectorResourceOffloadRate = 1f;
@@ -42,7 +41,6 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        averageResourceCollectionRatePerSecond = calculateAverageResourceCollectionRatePerSecond();
         HandleUnitSelection();
     }
 
@@ -54,8 +52,10 @@ public class GameManager : MonoBehaviour
         if it is, select the collector
         if not, deselect the collector
         */
-        if(Input.GetMouseButtonDown(0))
-        {
+        if (!Input.GetMouseButtonDown(0)){
+            return;
+        }
+        else{
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if(Physics.Raycast(ray, out hit))
@@ -72,19 +72,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void increaseCollectorSpeed()
-    {
-        if(resourceAvailable(collectorMovementSpeedLevel)){
-            collectorMovementSpeed += 0.5f;
-            GameObject[] collectors = baseBuildingScript.collectors;
-            for(int i = 0; i < collectors.Length; i++)
-            {
-                collectors[i].GetComponent<CollectorController>().speed = collectorMovementSpeed;
-            }
-            collectorMovementSpeedLevel += 1;
-            removeResource(collectorMovementSpeedLevel * 100);
-        }
-    }
+   
 
     public void removeResource(float amount)
     {
@@ -94,60 +82,81 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void increaseCollectorCapacity()
+    public void IncreaseCollectorStat(ref float statValue, ref float statLevel, System.Action<CollectorController, float> applyStat)
     {
-       if(resourceAvailable(collectorResourceCapacityLevel)){
-            collectorResourceCapacity += 30f;
-            GameObject[] collectors = baseBuildingScript.collectors;
-            for(int i = 0; i < collectors.Length; i++)
+        if (resourceAvailable(statLevel))
+        {
+            statValue += 0.5f;
+            foreach (var collector in baseBuildingScript.collectors)
             {
-                collectors[i].GetComponent<CollectorController>().resourceCapacity = collectorResourceCapacity;
+                applyStat(collector.GetComponent<CollectorController>(), statValue);
             }
-            collectorResourceCapacityLevel += 1;
-            removeResource(collectorResourceCapacityLevel * 100);
+            statLevel += 1;
         }
     }
 
+
+     public void increaseCollectorSpeed()
+    {
+        IncreaseCollectorStat(ref collectorMovementSpeed, ref collectorMovementSpeedLevel, 
+        (collector, speed) => collector.speed = speed);
+    }
+
+    public void increaseCollectorCapacity()
+    {
+        //it must be different from the other methods, because the capacity increases faster
+       if(resourceAvailable(collectorResourceCapacityLevel)){
+                collectorResourceCapacity += 30f;
+                foreach (var collector in baseBuildingScript.collectors)
+                {
+                    collector.GetComponent<CollectorController>().resourceCapacity = collectorResourceCapacity;
+                }
+                removeResource(collectorResourceCapacityLevel * 100);
+                collectorResourceCapacityLevel += 1;
+        }
+    }
+
+    public void increaseCollectorLoadRate(){
+       IncreaseCollectorStat(ref collectorResourceGatherRate, ref collectorResourceGatherRateLevel, 
+        (collector, rate) => collector.resourceCollectRate = rate);
+    }
+
+    public void increaseCollectorOffloadRate(){
+        IncreaseCollectorStat(ref collectorResourceOffloadRate, ref collectorResourceOffloadRateLevel,
+        (collector, rate) => collector.resourceOffloadRate = rate);
+    }
+
+    
     public GameObject[] getCollectors(){
         collectors = baseBuildingScript.collectors;
         return collectors;
     }
 
-    public void increaseCollectorLoadRate(){
-        if(resourceAvailable(collectorResourceGatherRateLevel)){
-            collectorResourceGatherRate += 0.5f;
-            GameObject[] collectors = baseBuildingScript.collectors;
-            for(int i = 0; i < collectors.Length; i++)
-            {
-                collectors[i].GetComponent<CollectorController>().resourceCollectRate = collectorResourceGatherRate;
-            }
-            collectorResourceGatherRateLevel += 1;
-            removeResource(collectorResourceGatherRateLevel * 100);
+    private Dictionary<float, float> upgradeCostCache = new Dictionary<float, float>();
+
+    public float GetUpgradeCost(float upgradeLevel)
+    {
+        if (!upgradeCostCache.TryGetValue(upgradeLevel, out var cost))
+        {
+            cost = Mathf.Max(50, upgradeLevel * 100);
+            upgradeCostCache[upgradeLevel] = cost;
         }
+        return cost;
     }
 
-    public void increaseCollectorOffloadRate(){
-        if(resourceAvailable(collectorResourceOffloadRateLevel)){
-            collectorResourceOffloadRate += 0.5f;
-            GameObject[] collectors = baseBuildingScript.collectors;
-            for(int i = 0; i < collectors.Length; i++)
-            {
-                collectors[i].GetComponent<CollectorController>().resourceOffloadRate = collectorResourceOffloadRate;
-            }
-            collectorResourceOffloadRateLevel += 1;
-            removeResource(collectorResourceOffloadRateLevel * 100);
-        }
-    }
+
+
 
     public bool resourceAvailable(float upgradeLevel)
     {
-        float resourceCost = upgradeLevel * 100;
+        float resourceCost = GetUpgradeCost(upgradeLevel);
         if(resourceAmount >= resourceCost)
         {
             resourceAmount -= resourceCost;
             return true;
+        }else{
+            return false;
         }
-        return false;
     }
 
     public int calculateUpgradeCost(float upgradeLevel){
@@ -156,16 +165,5 @@ public class GameManager : MonoBehaviour
     public int calculateCollectorCost(){
         collectors = baseBuildingScript.collectors;
         return  Mathf.Max(50, collectors.Length * 50) ;
-    }
-
-    public float calculateAverageResourceCollectionRatePerSecond()
-    {
-        float totalResourceCollectionRate = 0f;
-        collectors = baseBuildingScript.collectors;
-        for(int i = 0; i < collectors.Length; i++)
-        {
-            totalResourceCollectionRate += collectors[i].GetComponent<CollectorController>().resourceCollectRate;
-        }
-        return totalResourceCollectionRate;
     }
 }

@@ -16,11 +16,18 @@ public class BaseBuildingScript : MonoBehaviour
        
     // Start is called before the first frame update
     void Start()
-    {
-        canvasController = GameObject.Find("Canvas").GetComponent<CanvasController>();
-        spawnCollectorButton = GameObject.Find("SpawnCollectorButton");
-        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
-        
+    {  
+        // Cache references only if not set in the editor
+        if (!canvasController)
+            canvasController = GameObject.Find("Canvas").GetComponent<CanvasController>();
+
+       
+        if (!spawnCollectorButton)
+            spawnCollectorButton = GameObject.Find("SpawnCollectorButton");
+
+        if (!gameManager)
+            gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+
         resourceCost = gameManager.calculateCollectorCost();
         
     }
@@ -34,24 +41,16 @@ public class BaseBuildingScript : MonoBehaviour
 
     public float GiveResource(float amount)
     {
-        float givenAmount = 0;
-        if(gameManager.resourceCapacity <= 0)
+       if (gameManager.resourceCapacity <= 0)
         {
             return 0;
         }
-          
-        if(gameManager.resourceCapacity - amount > 0){
-            givenAmount = amount;
-            gameManager.resourceCapacity -= amount;
-            return givenAmount;
-        }
-        else
-        {
-            givenAmount = gameManager.resourceCapacity;
-            //what is this line doing?
-            //resourceCapacity = 0;
-            return givenAmount;
-        }
+
+        // Clamp the amount to be the maximum available capacity
+        float givenAmount = Mathf.Min(amount, gameManager.resourceCapacity);
+        gameManager.resourceCapacity -= givenAmount;
+
+        return givenAmount;
     }
 
     public void AddResource(float amount)
@@ -66,23 +65,28 @@ public class BaseBuildingScript : MonoBehaviour
     
 
     public void SpawnResourceCollector(){
-        collectors = GameObject.FindGameObjectsWithTag("Collector");
-        int resourceCost = gameManager.calculateCollectorCost();
-        Debug.Log("Resource Cost: " + resourceCost + " Resource Amount: " + gameManager.resourceAmount);
-        if(gameManager.resourceAmount < resourceCost)
+        if (gameManager.resourceAmount < resourceCost)
         {
             return;
         }
+
+        // Instantiate the new collector
         GameObject resourceCollector = Instantiate(collectorPrefab, transform.position, Quaternion.identity);
         resourceCollector.transform.parent = transform;
+
+        // Set collector stats
         CollectorController resourceCollectorController = resourceCollector.GetComponent<CollectorController>();
         resourceCollectorController.speed = gameManager.collectorMovementSpeed;
         resourceCollectorController.resourceCapacity = gameManager.collectorResourceCapacity;
         resourceCollectorController.resourceCollectRate = gameManager.collectorResourceGatherRate;
         resourceCollectorController.resourceOffloadRate = gameManager.collectorResourceOffloadRate;
 
+        // Deduct resources
         gameManager.removeResource(resourceCost);
-        collectors = GameObject.FindGameObjectsWithTag("Collector");
+
+        // Add the new collector to the list
+         collectors = GameObject.FindGameObjectsWithTag("Collector");
+    
     }
 
 
