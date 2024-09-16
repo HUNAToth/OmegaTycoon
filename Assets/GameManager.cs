@@ -26,7 +26,7 @@ public class GameManager : MonoBehaviour
     public GameObject selectedUnit;
 
 
-    GameObject[] collectors;
+    List<GameObject> collectors;
     
 
     // Start is called before the first frame update
@@ -87,7 +87,7 @@ public class GameManager : MonoBehaviour
         if (resourceAvailable(statLevel))
         {
             statValue += 0.5f;
-            foreach (var collector in baseBuildingScript.collectors)
+            foreach (var collector in baseBuildingScript.collectorsList)
             {
                 applyStat(collector.GetComponent<CollectorController>(), statValue);
             }
@@ -107,7 +107,7 @@ public class GameManager : MonoBehaviour
         //it must be different from the other methods, because the capacity increases faster
        if(resourceAvailable(collectorResourceCapacityLevel)){
                 collectorResourceCapacity += 30f;
-                foreach (var collector in baseBuildingScript.collectors)
+                foreach (var collector in baseBuildingScript.collectorsList)
                 {
                     collector.GetComponent<CollectorController>().resourceCapacity = collectorResourceCapacity;
                 }
@@ -127,8 +127,8 @@ public class GameManager : MonoBehaviour
     }
 
     
-    public GameObject[] getCollectors(){
-        collectors = baseBuildingScript.collectors;
+    public List<GameObject> getCollectors(){
+        collectors = baseBuildingScript.collectorsList;
         return collectors;
     }
 
@@ -163,7 +163,7 @@ public class GameManager : MonoBehaviour
         return Mathf.Max(50, (int)upgradeLevel * 100);
     }
     public int calculateCollectorCost(){
-        collectors = baseBuildingScript.collectors;
-        return  Mathf.Max(50, collectors.Length * 50) ;
+        collectors = baseBuildingScript.collectorsList;
+        return  Mathf.Max(50, collectors.Count * 50) ;
     }
 }

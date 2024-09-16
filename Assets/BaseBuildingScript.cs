@@ -6,7 +6,7 @@ using TMPro;
 public class BaseBuildingScript : MonoBehaviour
 {
     public GameObject collectorPrefab;
-    public GameObject[] collectors;
+    public List<GameObject> collectorsList = new List<GameObject>();
     public CanvasController canvasController;
     public GameObject spawnCollectorButton;
 
@@ -85,7 +85,7 @@ public class BaseBuildingScript : MonoBehaviour
         gameManager.removeResource(resourceCost);
 
         // Add the new collector to the list
-         collectors = GameObject.FindGameObjectsWithTag("Collector");
+        collectorsList.Add(resourceCollector);
     
     }
 

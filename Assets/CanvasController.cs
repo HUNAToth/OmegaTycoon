@@ -92,7 +92,7 @@ public class CanvasController : MonoBehaviour
 
     public void updateUpgradeBTN(GameObject button, float resourceAmount, float resourceCost)
     {
-        if(gameManager.getCollectors().Length == 0)
+        if(gameManager.getCollectors().Count == 0)
         {
             button.GetComponent<UnityEngine.UI.Button>().interactable = false;
             button.GetComponentInChildren<TextMeshProUGUI>().text = " " + resourceCost + " ";
