@@ -28,10 +28,21 @@ public class CollectorController : MonoBehaviour
     public float collectTime = 5f;
     public float collectTimer = 0f;
     public float offloadingTime = 5f;
-    public float offloadingTimer = 0f;
+    private float offloadingTimer = 0f;
     public float resourceCapacity = 100f;
     public bool isSelected = false;
     public bool onBase = false;
+
+    public Color highlightColor = Color.yellow;
+
+    public ParticleSystem miningEffect;
+
+    private Renderer selfRenderer;
+
+    public Material selfMaterial;
+    public Material selfSelectedMaterial;
+
+    public GameObject shipPrefab;
 
 
     // Start is called before the first frame update
@@ -40,47 +51,65 @@ public class CollectorController : MonoBehaviour
         collectorRb = GetComponent<Rigidbody>();
         baseBuilding = GameObject.Find("BASE");
         gameObject.name = GetInitShipName();
+        miningEffect = GetComponentInChildren<ParticleSystem>();
+        miningEffect.Stop();
+        selfRenderer = transform.Find("Spacefrigate").GetComponent<Renderer>();
+        selfMaterial = selfRenderer.material;
+        shipPrefab = transform.Find("Spacefrigate").gameObject;
     }
 
     // Update is called once per frame
     void Update()
-    { 
-       
+    {
+
     }
 
     private void FixedUpdate()
     {
         selfSelectCheck();
-        if (isCollecting){
+        if (isCollecting)
+        {
             CollectResource(targetResource.GetComponentInParent<ResourcePointScript>());
-         }
-         if(isOffloading){
+            if (!miningEffect.isPlaying)
+            {
+                Debug.Log("Mining effect started");
+                miningEffect.Play();
+            }
+        }
+        if (isOffloading)
+        {
             OffLoadResource();
-         }
+        }
 
         if (isMovingToResource)
         {
+            miningEffect.Stop();
             targetResource = FindClosestResource();
-            if(targetResource != null){
+            if (targetResource != null)
+            {
                 MoveToResource();
             }
         }
         else
         {
+            miningEffect.Stop();
             MoveToBase();
-        }   
+        }
     }
 
     void selfSelectCheck()
     {
-        
-        if( baseBuilding.GetComponent<BaseBuildingScript>().gameManager.selectedUnit!= null &&
-            (baseBuilding.GetComponent<BaseBuildingScript>().gameManager.selectedUnit.name == this.name)){
+
+        if (baseBuilding.GetComponent<BaseBuildingScript>().gameManager.selectedUnit != null &&
+            (baseBuilding.GetComponent<BaseBuildingScript>().gameManager.selectedUnit.name == this.name))
+        {
+            isSelected = true;
+            shipPrefab.GetComponent<Renderer>().material = selfSelectedMaterial;
+        }
+        else
+        {
             isSelected = false;
-            this.GetComponent<Renderer>().material.color = Color.white;
-        
-        }else{
-            isSelected = false;
+            shipPrefab.GetComponent<Renderer>().material = selfMaterial;
         }
     }
 
@@ -90,21 +119,26 @@ public class CollectorController : MonoBehaviour
         if (other.CompareTag("Resource"))
         {
             ResourcePointScript resourcePoint = other.GetComponent<ResourcePointScript>();
-            if(resourcePoint.isHarvested && 
+            if (resourcePoint.isHarvested &&
                 resourcePoint.currentCollector != this)
             {
                 return;
-            }else{
-                
+            }
+            else
+            {
+
                 CollectResource(resourcePoint);
             }
-            
+
         }
-        if(other.CompareTag("Base"))
+        if (other.CompareTag("Base"))
         {
-            if(resourceCollected > 0){
+            if (resourceCollected > 0)
+            {
                 OffLoadResource();
-            }else{
+            }
+            else
+            {
                 isMovingToResource = true;
             }
 
@@ -124,7 +158,7 @@ public class CollectorController : MonoBehaviour
         foreach (GameObject resource in resources)
         {
             ResourcePointScript resourcePoint = resource.GetComponentInParent<ResourcePointScript>();
-            if(resourcePoint.isHarvested && 
+            if (resourcePoint.isHarvested &&
                resourcePoint.currentCollector != this)
             {
                 continue;
@@ -137,7 +171,7 @@ public class CollectorController : MonoBehaviour
                 distance = curDistance;
             }
         }
-       // Debug.Log("Closest resource found+ " + closest);
+        // Debug.Log("Closest resource found+ " + closest);
         return closest;
     }
 
@@ -148,7 +182,7 @@ public class CollectorController : MonoBehaviour
         MoveToPoint(targetResource.transform.position);
     }
 
-    void MoveToBase()  
+    void MoveToBase()
     {
         MoveToPoint(baseBuilding.transform.position);
     }
@@ -161,45 +195,51 @@ public class CollectorController : MonoBehaviour
 
     void CollectResource(ResourcePointScript resourcePoint)
     {
-      //  Debug.Log("Collecting resource");
+        //  Debug.Log("Collecting resource");
         isCollecting = true;
+        miningEffect.Play();
         resourcePoint.isHarvested = true;
         resourcePoint.currentCollector = this;
-            if(resourceCapacity >= resourceCollected){
-                collectTimer += Time.deltaTime;
-                if(collectTimer >= collectTime)
-                {
-                    collectTimer = 0;
-                    float resourceAmount = resourcePoint.resourceAmount;
-                    resourceAmount -= resourceAmount-resourceCollectRate>=0?resourceCollectRate:0;
-                    float gotAmount = resourcePoint.GiveResource(resourceCollectRate);
-                   resourceCollected += gotAmount;
-                }
+        if (resourceCapacity >= resourceCollected)
+        {
+            collectTimer += Time.deltaTime;
+            if (collectTimer >= collectTime)
+            {
+                collectTimer = 0;
+                float resourceAmount = resourcePoint.resourceAmount;
+                resourceAmount -= resourceAmount - resourceCollectRate >= 0 ? resourceCollectRate : 0;
+                float gotAmount = resourcePoint.GiveResource(resourceCollectRate);
+                resourceCollected += gotAmount;
             }
-            if(resourceCapacity <= resourceCollected){
-                Debug.Log("Resource capacity reached");
-                resourcePoint.isHarvested = false;
-                resourcePoint.currentCollector = null;
-                isMovingToResource = false;
-                isCollecting = false;
-            }
+        }
+        if (resourceCapacity <= resourceCollected)
+        {
+            Debug.Log("Resource capacity reached");
+            resourcePoint.isHarvested = false;
+            resourcePoint.currentCollector = null;
+            isMovingToResource = false;
+            isCollecting = false;
+        }
     }
 
-    void OffLoadResource(){
-     //   Debug.Log("Offloading resource");
+    void OffLoadResource()
+    {
+        //   Debug.Log("Offloading resource");
         isOffloading = true;
         GameManager gameManager = baseBuilding.GetComponent<BaseBuildingScript>().gameManager;
-         if(resourceCollected > 0){
+        if (resourceCollected > 0)
+        {
             offloadingTimer += Time.deltaTime;
-            if(offloadingTimer >= offloadingTime)
+            if (offloadingTimer >= offloadingTime)
             {
                 offloadingTimer = 0;
                 baseBuilding.GetComponent<BaseBuildingScript>().AddResource(resourceOffloadRate);
-               // Debug.Log("Resource offloaded, new amount in GameManager: " + gameManager.resourceAmount);
+                // Debug.Log("Resource offloaded, new amount in GameManager: " + gameManager.resourceAmount);
                 resourceCollected -= resourceOffloadRate;
             }
         }
-        if(resourceCollected <= 0){
+        if (resourceCollected <= 0)
+        {
             isOffloading = false;
             isMovingToResource = true;
             resourceCollected = 0;
@@ -214,7 +254,7 @@ public class CollectorController : MonoBehaviour
 
     public string GetInitShipName()
     {
-        string[] shipnames = 
+        string[] shipnames =
         new string[] {
             "The Flying Dutchman",
             "The Black Pearl",
@@ -237,6 +277,6 @@ public class CollectorController : MonoBehaviour
             "The Nostromo",
             "The Rocinante"};
         return shipnames[Random.Range(0, shipnames.Length)];
-    }   
-    
+    }
+
 }
